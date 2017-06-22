@@ -2,6 +2,7 @@ WiFiUDP Udp;
 const unsigned int outPort = 12400;          // remote port (not needed for receive)
 const unsigned int localPort = 12500;        // local port to listen for UDP packets (here's where we send the packets)
 OSCErrorCode error;
+bool zero_lock = true;
 
 void init_osc()
 {
@@ -24,8 +25,14 @@ void update_osc()
       bundle.dispatch("/stop", stop_osc);
       bundle.dispatch("/goto", goto_osc);
       bundle.dispatch("/power", pwr_osc);
+      bundle.dispatch("/zeroLock", zeroLock_osc);
     }
   }
+}
+
+void zeroLock_osc(OSCMessage &msg)
+{
+  zero_lock = msg.getInt(0);
 }
 
 void pwr_osc(OSCMessage &msg)
@@ -42,10 +49,12 @@ void goto_osc(OSCMessage &msg)
 void stop_osc(OSCMessage &msg)
 {
   stopMotor(true);
+  stopMotor(false);
 }
 
 void run_osc(OSCMessage &msg)
 {
+  int targ = msg.getInt(1);
   int dir = msg.getInt(0);
-  driveMotor(true, dir);
+  driveMotor(targ, dir);
 }

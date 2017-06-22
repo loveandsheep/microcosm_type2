@@ -19,8 +19,8 @@ void setPower(int pwr)
 
 void actuate()
 {
-  getRotary();
-  overRunCheck();
+//  getRotary();
+  if (zero_lock) overRunCheck();
 }
 
 void overRunCheck()
@@ -72,12 +72,14 @@ void driveGoto(int pos)
 
     if (rotPos < targPos)
     {
-      driveMotor(true, true);      
+      driveMotor(true, true);
+      driveMotor(false, true);
       driveStat = STAT_GOFOWARD;
     }
     else if (rotPos > targPos)
     {
-      driveMotor(true, false);  
+      driveMotor(true, false);
+      driveMotor(false, false);  
       driveStat = STAT_GOBACKWARD;  
     }
 
@@ -89,6 +91,7 @@ void driveMotor(bool isM1, bool isFoward)
   digitalWrite(PIN_EN, HIGH);
   analogWrite(isM1 ? PIN_M1_D1 : PIN_M2_D1, isFoward ? 0 : power);
   analogWrite(isM1 ? PIN_M1_D2 : PIN_M2_D2, isFoward ? power  : 0);
+  
   sendWebsockMessage(String("status:")+(isFoward ? "Extend" : "Rewind"));
   sendWebsockMessage("pos:moving...");
 }
@@ -96,8 +99,8 @@ void driveMotor(bool isM1, bool isFoward)
 void stopMotor(bool isM1)
 {
   driveStat = STAT_IDLE;
-  analogWrite(PIN_M1_D1, 0);
-  analogWrite(PIN_M1_D2, 0);
+  analogWrite(isM1 ? PIN_M1_D1 : PIN_M2_D1, 0);
+  analogWrite(isM1 ? PIN_M1_D2 : PIN_M2_D2, 0);
   digitalWrite(PIN_EN, HIGH);
   digitalWrite(isM1 ? PIN_M1_D1 : PIN_M2_D1, LOW);
   digitalWrite(isM1 ? PIN_M1_D2 : PIN_M2_D2, LOW);

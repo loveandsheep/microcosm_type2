@@ -3,8 +3,8 @@ void init_wifi()
 {
   SPIFFS.begin();
     
-  String ssid_w = "ERATO-Keio";
-  String pass_w = "kakehilab";
+  String ssid_w = "nomena_wifi_A";
+  String pass_w = "nomenanomena";
   String host_w = "host";
 
   File fw = SPIFFS.open(settings, "w");
@@ -34,9 +34,9 @@ void init_wifi()
   MDNS.addService("esp", "tcp", 8080);
 
   File f = SPIFFS.open(settings, "r");
-  String ssid_r = f.readStringUntil('\n');
-  String pass_r = f.readStringUntil('\n');
-  String host_ip = f.readStringUntil('\n');
+  String ssid_r   = f.readStringUntil('\n');
+  String pass_r   = f.readStringUntil('\n');
+  String host_ip  = f.readStringUntil('\n');
   f.close();
   ssid_r.trim();
   pass_r.trim();
@@ -116,10 +116,12 @@ void parseCommand(char* cmd)
   else if (sig == "doF")
   {
     driveMotor(true, true);
+    driveMotor(false, true);
   }
   else if (sig == "doB")
   {
     driveMotor(true, false);
+    driveMotor(false, true);
   }
   
 }
@@ -142,5 +144,6 @@ void waitForWifi()
   else
   {
     Serial.println("connection success.");
+    Serial.println(WiFi.localIP());
   }
 }
