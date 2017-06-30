@@ -3,8 +3,10 @@ void init_wifi()
 {
   SPIFFS.begin();
     
-  String ssid_w = "nomena_wifi_A";
-  String pass_w = "nomenanomena";
+  String ssid_w = "aterm-sheep";
+  String pass_w = "sheepmeme";
+//  String ssid_w = "ERATO-Keio";
+//  String pass_w = "kakehilab";
   String host_w = "host";
 
   File fw = SPIFFS.open(settings, "w");
@@ -47,6 +49,7 @@ void init_wifi()
   delay(1000);
   Serial.print("connect to ");
   Serial.println(ssid_r);
+  Serial.println(pass_r);
   WiFi.mode(WIFI_AP_STA);
   WiFi.begin(ssid_r.c_str(), pass_r.c_str());
   WiFi.softAP(ssid_ap.c_str(), pass_ap);
@@ -113,16 +116,8 @@ void parseCommand(char* cmd)
     int len = sig.substring(2,sig.length()).toInt();
     driveGoto(len);
   }
-  else if (sig == "doF")
-  {
-    driveMotor(true, true);
-    driveMotor(false, true);
-  }
-  else if (sig == "doB")
-  {
-    driveMotor(true, false);
-    driveMotor(false, true);
-  }
+  else if (sig == "doF") drivePole(true);
+  else if (sig == "doB") drivePole(false);
   
 }
 
@@ -134,7 +129,7 @@ void waitForWifi()
   {
     Serial.print(".");
     delay(300);
-    if (millis() - timeouter > 10000) break;
+    if (millis() - timeouter > 30000) break;
   }
 
   if (WiFi.status() != WL_CONNECTED)

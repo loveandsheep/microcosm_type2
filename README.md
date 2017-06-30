@@ -9,3 +9,7 @@ microcosm-type2開発のためのgitリポジトリです。リポジトリに�
 
 ## Usage
 設定方法、制御方法についてはwikiを参照し、oscExampleのサンプルデータを参考にしてください。
+
+ライブラリ：
+https://github.com/Links2004/arduinoWebSockets
+https://github.com/CNMAT/OSC

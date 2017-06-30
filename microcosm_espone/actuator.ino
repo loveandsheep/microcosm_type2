@@ -10,6 +10,7 @@ int  statbef = 0;
 int driveStat = STAT_IDLE;
 int power = 255;
 
+
 int targPos = -1;
 
 void setPower(int pwr)
@@ -31,6 +32,7 @@ void overRunCheck()
   if ((driveStat == STAT_BACKWARD || driveStat == STAT_GOBACKWARD) && (tipVal < THR_REFLECT))
   {
     stopMotor(true);
+    stopMotor(false);
     rotPos = 0;
     sendWebsockMessage("pos:"+String(rotPos));
   }
@@ -38,11 +40,13 @@ void overRunCheck()
   if ((driveStat == STAT_GOBACKWARD) && (rotPos  <= targPos))
   {
     stopMotor(true);
+    stopMotor(false);
   }
 
   if ((driveStat == STAT_GOFOWARD) && (rotPos  >= targPos))
   {
     stopMotor(true);
+    stopMotor(false);
   }
 
 }
@@ -72,28 +76,49 @@ void driveGoto(int pos)
 
     if (rotPos < targPos)
     {
-      driveMotor(true, true);
-      driveMotor(false, true);
-      driveStat = STAT_GOFOWARD;
+      drivePole(true);
     }
     else if (rotPos > targPos)
     {
-      driveMotor(true, false);
-      driveMotor(false, false);  
-      driveStat = STAT_GOBACKWARD;  
+      drivePole(false);
     }
 
 }
 
+void driveRoll(bool isExtend)
+{
+  driveMotor(false, isExtend);
+}
+
+void drivePole(bool isExtend)
+{
+  driveStat = isExtend ? STAT_FOWARD : STAT_BACKWARD;
+  if (isExtend)
+  {
+    driveMotor(true, false);
+    driveMotor(false, false);
+  }
+  else
+  {
+    driveMotor(true, true);
+    driveMotor(false, true);
+  }
+  sendWebsockMessage(String("status:")+(isExtend ? "Extend" : "Rewind"));
+  sendWebsockMessage("pos:moving...");
+}
+
 void driveMotor(bool isM1, bool isFoward)
 {
-  driveStat = isFoward ? STAT_FOWARD : STAT_BACKWARD;
-  digitalWrite(PIN_EN, HIGH);
-  analogWrite(isM1 ? PIN_M1_D1 : PIN_M2_D1, isFoward ? 0 : power);
-  analogWrite(isM1 ? PIN_M1_D2 : PIN_M2_D2, isFoward ? power  : 0);
+  int pw = power;
+  if (!isM1)
+  {
+    pw *= motorRatio;
+    if (!isFoward) pw *= motorRatio_ext;
+  }
   
-  sendWebsockMessage(String("status:")+(isFoward ? "Extend" : "Rewind"));
-  sendWebsockMessage("pos:moving...");
+  digitalWrite(PIN_EN, HIGH);
+  analogWrite(isM1 ? PIN_M1_D1 : PIN_M2_D1, isFoward ? 0 : pw);
+  analogWrite(isM1 ? PIN_M1_D2 : PIN_M2_D2, isFoward ? pw  : 0);
 }
 
 void stopMotor(bool isM1)
